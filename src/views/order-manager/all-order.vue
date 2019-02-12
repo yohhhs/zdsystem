@@ -58,9 +58,16 @@
     <Modal
       v-model="lookModal"
       :mask-closable="false"
+      width="700"
       title="查看订单详情">
-      <order-edit v-if="lookModal" :detail="currentDetail"></order-edit>
+        <div v-if="lookModal" style="display:flex;justify-content:space-between;font-size: 14px;margin-bottom: 15px;padding: 0 5px;">
+          <span>邀请码：{{currentDetail.inviteCode}}</span>
+          <span>规格：{{currentDetail.standard}}</span>
+          <span>征订总数：{{listDetail.count}}</span>
+        </div>
+      <Table :columns="listDetail.col" :loading="listDetail.loading" :data="listDetail.data"></Table>
       <div slot="footer">
+        <!--<Page style="margin-top: 20px;text-align: center;" :current="pageNo" :total="total" show-elevator @on-change='changeDetailPage'></Page>-->
       </div>
     </Modal>
     <Modal
@@ -88,6 +95,30 @@
   export default {
     data () {
       return {
+        listDetail: {
+          col: [
+            {
+              title: '姓名',
+              key: 'memberName'
+            },
+            {
+              title: '电话',
+              key: 'memberMobile'
+            },
+            {
+              title: '数量',
+              key: 'goodsCount'
+            },
+            {
+              title: '区域',
+              width: 300,
+              key: 'addressDetail'
+            }
+          ],
+          data: [],
+          loading: false,
+          count: 0
+        },
         uploadModal: false,
         currentDetail: null,
         lookModal: false,
@@ -241,7 +272,8 @@
                 on: {
                   click: () => {
                     this.currentDetail = params.row
-                    // this.openWriteModal()
+                    this.lookModal = true
+                    this.getListDetail()
                   }
                 }
               }, '查看')
@@ -300,6 +332,30 @@
       },
       hasBtn (name) {
         return this.handleList[this.$route.name] && (this.handleList[this.$route.name].indexOf('新建邀请码') > -1)
+      },
+      changeDetailPage (page) {
+        this.listDetail.page = page
+        this.getListDetail()
+      },
+      getListDetail () {
+        this.listDetail.loading = true
+        allOrder.getOrderList({
+          pageNo: 1,
+          pageSize: 100,
+          goodsId: this.currentDetail.goodsId
+        }).then(data => {
+          this.listDetail.loading = false
+          if (data !== 'isError') {
+            this.listDetail.data = data.list
+            if (data.list.length > 0) {
+              data.list.forEach(item => {
+                this.listDetail.count += item.goodsCount
+              })
+            }
+          }
+        }).catch(err => {
+          this.listDetail.loading = false
+        })
       },
       // btnClick (handleName) {
       //   switch (handleName) {

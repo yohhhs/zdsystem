@@ -459,5 +459,6 @@ export const allOrder = {
   getSolicitGoodsList,
   updateGoodsStatus,
   updateSolicitGoods,
-  deleteSolicitGoods
+  deleteSolicitGoods,
+  getOrderList
 }
