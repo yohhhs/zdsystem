@@ -35,6 +35,6 @@ let baseUri
 if (process.env.NODE_ENV === 'development' || process.env.buildType === 'test') {
   baseUri = 'https://www.topasst.com/solicitCms'
 } else {
-  baseUri = '/solicitCms'
+  baseUri = 'https://www.topasst.com/solicitCms'
 }
 export const baseUrl = baseUri

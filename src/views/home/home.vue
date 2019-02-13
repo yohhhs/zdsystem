@@ -1,69 +1,69 @@
 <template>
   <div class="home">
-    <ul class="card-list">
-      <li class="list-item">
-        <div class="card-wrapper">
-          <div class="icon-wrapper" style="background-color: #2b85e4">
-            <Icon size="36" color="#fff" type="ios-add-circle"/>
-          </div>
-          <div class="content-wrapper">
-            <p class="content-number">{{topData.todayNewMemberCount}}</p>
-            <p class="content-name">新增用户</p>
-          </div>
-        </div>
-      </li>
-      <li class="list-item">
-        <div class="card-wrapper">
-          <div class="icon-wrapper" style="background-color: rgb(25, 190, 107)">
-            <Icon size="36" color="#fff" type="md-people"/>
-          </div>
-          <div class="content-wrapper">
-            <p class="content-number">{{topData.totalMemberCount}}</p>
-            <p class="content-name">总用户量</p>
-          </div>
-        </div>
-      </li>
-      <li class="list-item">
-        <div class="card-wrapper">
-          <div class="icon-wrapper" style="background-color: rgb(255, 153, 0)">
-            <Icon size="36" color="#fff" type="ios-alert"/>
-          </div>
-          <div class="content-wrapper">
-            <p class="content-number">{{topData.noOrderMemberCount}}</p>
-            <p class="content-name">未下单</p>
-          </div>
-        </div>
-      </li>
-      <li class="list-item">
-        <div class="card-wrapper">
-          <div class="icon-wrapper" style="background-color: rgb(237, 63, 20)">
-            <Icon size="36" color="#fff" type="md-checkmark-circle"/>
-          </div>
-          <div class="content-wrapper">
-            <p class="content-number">{{topData.oneOrderMemberCount}}</p>
-            <p class="content-name">一次下单</p>
-          </div>
-        </div>
-      </li>
-      <li class="list-item">
-        <div class="card-wrapper">
-          <div class="icon-wrapper" style="background-color: rgb(228, 108, 187)">
-            <Icon size="36" color="#fff" type="md-done-all"/>
-          </div>
-          <div class="content-wrapper">
-            <p class="content-number">{{topData.passTwoOrderMemberCount}}</p>
-            <p class="content-name">两次及以上</p>
-          </div>
-        </div>
-      </li>
-    </ul>
-    <div class="order-count-wrapper">
-      <order-count></order-count>
-      <order-count :dateType="2"></order-count>
-      <order-count :dateType="3"></order-count>
-      <order-count :dateType="4"></order-count>
-    </div>
-    <Table :columns="tableColumns" :loading="tableLoading" :data="tableData"></Table>
+    <!--<ul class="card-list">-->
+      <!--<li class="list-item">-->
+        <!--<div class="card-wrapper">-->
+          <!--<div class="icon-wrapper" style="background-color: #2b85e4">-->
+            <!--<Icon size="36" color="#fff" type="ios-add-circle"/>-->
+          <!--</div>-->
+          <!--<div class="content-wrapper">-->
+            <!--<p class="content-number">{{topData.todayNewMemberCount}}</p>-->
+            <!--<p class="content-name">新增用户</p>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</li>-->
+      <!--<li class="list-item">-->
+        <!--<div class="card-wrapper">-->
+          <!--<div class="icon-wrapper" style="background-color: rgb(25, 190, 107)">-->
+            <!--<Icon size="36" color="#fff" type="md-people"/>-->
+          <!--</div>-->
+          <!--<div class="content-wrapper">-->
+            <!--<p class="content-number">{{topData.totalMemberCount}}</p>-->
+            <!--<p class="content-name">总用户量</p>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</li>-->
+      <!--<li class="list-item">-->
+        <!--<div class="card-wrapper">-->
+          <!--<div class="icon-wrapper" style="background-color: rgb(255, 153, 0)">-->
+            <!--<Icon size="36" color="#fff" type="ios-alert"/>-->
+          <!--</div>-->
+          <!--<div class="content-wrapper">-->
+            <!--<p class="content-number">{{topData.noOrderMemberCount}}</p>-->
+            <!--<p class="content-name">未下单</p>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</li>-->
+      <!--<li class="list-item">-->
+        <!--<div class="card-wrapper">-->
+          <!--<div class="icon-wrapper" style="background-color: rgb(237, 63, 20)">-->
+            <!--<Icon size="36" color="#fff" type="md-checkmark-circle"/>-->
+          <!--</div>-->
+          <!--<div class="content-wrapper">-->
+            <!--<p class="content-number">{{topData.oneOrderMemberCount}}</p>-->
+            <!--<p class="content-name">一次下单</p>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</li>-->
+      <!--<li class="list-item">-->
+        <!--<div class="card-wrapper">-->
+          <!--<div class="icon-wrapper" style="background-color: rgb(228, 108, 187)">-->
+            <!--<Icon size="36" color="#fff" type="md-done-all"/>-->
+          <!--</div>-->
+          <!--<div class="content-wrapper">-->
+            <!--<p class="content-number">{{topData.passTwoOrderMemberCount}}</p>-->
+            <!--<p class="content-name">两次及以上</p>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</li>-->
+    <!--</ul>-->
+    <!--<div class="order-count-wrapper">-->
+      <!--<order-count></order-count>-->
+      <!--<order-count :dateType="2"></order-count>-->
+      <!--<order-count :dateType="3"></order-count>-->
+      <!--<order-count :dateType="4"></order-count>-->
+    <!--</div>-->
+    <!--<Table :columns="tableColumns" :loading="tableLoading" :data="tableData"></Table>-->
   </div>
 </template>
 <script>
