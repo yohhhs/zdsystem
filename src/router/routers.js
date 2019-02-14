@@ -134,6 +134,19 @@ export const appRouter = [
     ]
   },
   {
+    path: '/order-manager',
+    name: 'order-manager',
+    component: Main,
+    single: 'cancel-order',
+    children: [
+      {
+        path: 'cancel-order',
+        name: 'cancel-order',
+        component: resolve => require(['@/views/order-manager/cancel-order.vue'], resolve)
+      }
+    ]
+  },
+  {
     path: '/finance-manager',
     name: 'finance-manager',
     component: Main,
@@ -142,11 +155,6 @@ export const appRouter = [
         path: 'already-paid-report',
         name: 'already-paid-report',
         component: resolve => require(['@/views/finance-manager/already-paid-report.vue'], resolve)
-      },
-      {
-        path: 'cancel-order-finance',
-        name: 'cancel-order-finance',
-        component: resolve => require(['@/views/finance-manager/cancel-order-finance.vue'], resolve)
       },
       {
         path: 'costs-count',

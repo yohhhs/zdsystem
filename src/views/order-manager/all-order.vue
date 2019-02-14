@@ -203,24 +203,24 @@
             }
           },
           {
-            title: '征订开始时间',
+            title: '开始时间',
             key: 'startTime',
-            width: 160
+            width: 100
           },
           {
-            title: '征订结束时间',
+            title: '结束时间',
             key: 'endTime',
-            width: 160
+            width: 100
           },
           {
             title: '创建时间',
             key: 'createTimeStr',
-            width: 160
+            width: 100
           },
           {
             title: '更新时间',
             key: 'updateTimeStr',
-            width: 160
+            width: 100
           },
           {
             title: '操作',
@@ -282,7 +282,7 @@
                   handles = [statusChange, edit, close]
                   break
                 case 2:
-                  handles = [edit]
+                  handles = [statusChange, edit, look]
                   break
                 case 3:
                   handles = [look]

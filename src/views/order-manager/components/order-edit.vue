@@ -3,7 +3,7 @@
     <div class="modal-input-item">
       <p class="label">邀请码</p>
       <div style="width: 350px">
-        <Input v-model="formData.inviteCode" :maxlength="8" placeholder="请输入邀请码（4-8位，由大小写英文字母或数字组成）"/>
+        <Input v-model="formData.inviteCode" :maxlength="8" placeholder="请输入邀请码（4-8位，由大小写英文字母或数字组成）" :disabled="isWrite"/>
       </div>
     </div>
     <div class="modal-input-item">
