@@ -342,7 +342,7 @@
         allOrder.getOrderList({
           pageNo: 1,
           pageSize: 100,
-          goodsId: this.currentDetail.goodsId
+          solicitGoodsId: this.currentDetail.goodsId
         }).then(data => {
           this.listDetail.loading = false
           if (data !== 'isError') {
