@@ -107,7 +107,7 @@
               key: 'goodsCount'
             },
             {
-              title: '区域',
+              title: '区部',
               width: 300,
               key: 'addressDetail'
             }
