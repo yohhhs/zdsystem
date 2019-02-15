@@ -347,6 +347,7 @@
           this.listDetail.loading = false
           if (data !== 'isError') {
             this.listDetail.data = data.list
+            this.listDetail.count = 0
             if (data.list.length > 0) {
               data.list.forEach(item => {
                 this.listDetail.count += item.goodsCount
