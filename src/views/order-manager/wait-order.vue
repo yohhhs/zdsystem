@@ -16,14 +16,6 @@
     <Page style="margin-top: 20px;text-align: center;" :current="pageNo" :total="total" show-elevator
           @on-change='changePage'></Page>
     <Modal
-      v-model="lookModal"
-      :mask-closable="false"
-      title="查看订单详情">
-      <order-edit v-if="lookModal" :detail="currentDetail"></order-edit>
-      <div slot="footer">
-      </div>
-    </Modal>
-    <Modal
       v-model="addModal.isShow"
       width="575"
       :mask-closable="false"
@@ -34,6 +26,39 @@
           确定
         </Button>
         <Button type="error" size="large" @click="closeAddModal">取消</Button>
+      </div>
+    </Modal>
+    <Modal
+      v-model="writeModal.isShow"
+      width="575"
+      :mask-closable="false"
+      title="修改产品">
+      <produce-edit v-if="writeModal.isShow" ref="writeEdit" isWrite :detail="currentDetail"></produce-edit>
+      <div slot="footer" style="text-align: center">
+        <Button type="primary" size="large" :loading="writeModal.loading" @click="writeConfirm">
+          确定
+        </Button>
+        <Button type="error" size="large" @click="closeWriteModal">取消</Button>
+      </div>
+    </Modal>
+    <Modal
+      v-model="lookImgModal.isShow"
+      width="575"
+      footer-hide
+      title="查看图片">
+      <div class="modal-img">
+        <img :src="currentLookImg" alt="">
+      </div>
+      <div slot="footer" style="text-align: center">
+      </div>
+    </Modal>
+    <Modal
+      v-model="deleteModal.isShow"
+      :mask-closable="false"
+      title="删除产品">
+      <p style="text-align: center;font-size: 14px;line-height: 60px">确认删除当前产品吗</p>
+      <div slot="footer" style="text-align: center">
+        <Button type="error" :loading="deleteModal.loading" @click="deleteConfirm">确认删除</Button>
       </div>
     </Modal>
   </div>
@@ -48,6 +73,14 @@
   export default {
     data() {
       return {
+        currentLookImg: '',
+        lookImgModal: {
+          isShow: false
+        },
+        deleteModal: {
+          isShow: false,
+          loading: false
+        },
         currentDetail: null,
         lookModal: false,
         selectIds: [],
@@ -87,7 +120,21 @@
           {
             title: '商品图片',
             render: (h, params) => {
-              return h('div', params.row.goodsCount * params.row.salePrice)
+              return h('div', {
+                class: 'table-img',
+                on: {
+                  click: () => {
+                    if (params.row.goodsImage) {
+                      this.currentLookImg = params.row.goodsImage
+                      this.lookImgModal.isShow = true
+                    }
+                  }
+                }
+              }, [h('img', {
+                attrs: {
+                  src: params.row.goodsImage
+                }
+              })])
             }
           },
           {
@@ -102,7 +149,7 @@
               return h('div', [
                 h('Button', {
                   props: {
-                    type: 'primary',
+                    type: 'warning',
                     size: 'small'
                   },
                   style: {
@@ -110,17 +157,18 @@
                   },
                   on: {
                     click: () => {
-                      allOrder.orderDetail({
-                        purchaseOrderId: params.row.purchaseOrderId
+                      waitOrder.updateGoodsStatus({
+                        goodsId: params.row.goodsId,
+                        status: params.row.status === 1 ? 0 : 1
                       }).then(data => {
                         if (data !== 'isError') {
-                          this.currentDetail = data
-                          this.lookModal = true
+                          this.successInfo('更改状态成功')
+                          this.getAllOrder()
                         }
                       })
                     }
                   }
-                }, '查看'),
+                }, params.row.status === 1 ? '停用' : '启用'),
                 h('Button', {
                   props: {
                     type: 'warning',
@@ -131,7 +179,8 @@
                   },
                   on: {
                     click: () => {
-
+                      this.currentDetail = params.row
+                      this.openWriteModal()
                     }
                   }
                 }, '编辑'),
@@ -145,7 +194,8 @@
                   },
                   on: {
                     click: () => {
-
+                      this.currentDetail = params.row
+                      this.deleteModal.isShow = true
                     }
                   }
                 }, '删除')
@@ -253,9 +303,69 @@
             this.closeAddLoading()
           })
         }
+      },
+      writeConfirm () {
+        let returnData = this.$refs.writeEdit.returnData()
+        if (returnData) {
+          delete returnData.goodsCode
+          this.openWriteLoading()
+          waitOrder.updateGoods({
+            goodsId: this.currentDetail.goodsId,
+            ...returnData
+          }).then(data => {
+            this.closeWriteLoading()
+            if (data !== 'isError') {
+              this.successInfo('修改产品成功')
+              this.getAllOrder()
+              this.closeWriteModal()
+            }
+          }).catch(err => {
+            this.closeWriteLoading()
+          })
+        }
+      },
+      deleteConfirm () {
+        this.deleteModal.loading = true
+        waitOrder.deleteGoods({
+          goodsId: this.currentDetail.goodsId
+        }).then(data => {
+          if (data !== 'isError') {
+            this.successInfo('删除产品成功')
+            this.correctPageNo()
+            this.getAllOrder()
+            this.deleteModal.isShow = false
+          }
+          this.deleteModal.loading = false
+        }).catch(err => {
+          this.deleteModal.loading = false
+        })
       }
     }
   }
 </script>
 <style lang="less">
+  .table-img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    img {
+      max-width: 100%;
+      man-height: 100%;
+    }
+  }
+  .modal-img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 543px;
+    height: 543px;
+    background-color: #eee;
+    img {
+      max-width: 100%;
+      man-height: 100%;
+    }
+  }
 </style>

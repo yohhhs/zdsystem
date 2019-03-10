@@ -9,13 +9,13 @@
     <div class="modal-input-item">
       <p class="label">产品名称：</p>
       <div style="width: 350px">
-        <Input v-model="formData.goodsName" :disabled="isWrite" placeholder="请输入产品名称"/>
+        <Input v-model="formData.goodsName" placeholder="请输入产品名称"/>
       </div>
     </div>
     <div class="modal-input-item">
       <p class="label">供应商：</p>
       <div style="width: 350px">
-        <Input v-model="formData.supplier" :disabled="isWrite" placeholder="请输入供应商"/>
+        <Input v-model="formData.supplier" placeholder="请输入供应商"/>
       </div>
     </div>
     <div class="modal-input-item">
@@ -36,15 +36,20 @@
       <p class="label">产品图片：</p>
       <div style="width: 350px">
         <Upload
-          v-show="!isLook"
           ref="listUpload"
           withCredentials
+          paste
+          :show-upload-list="false"
           name="files"
           accept="image/*"
           :format="['jpg','jpeg','png']"
           :on-success="imgListSuccess"
           action="https://www.topasst.com/cms/file/uploadFile">
-          <Button type="primary" ghost>上传产品图片</Button>
+          <!--<Button type="primary" ghost>上传产品图片</Button>-->
+          <div class="img-wrapper">
+            <span v-if="formData.goodsImage === ''" class="upload-tip">+</span>
+            <img v-else :src="formData.goodsImage">
+          </div>
         </Upload>
       </div>
     </div>
@@ -52,9 +57,20 @@
 </template>
 
 <script>
+  import { message } from '@/common/js/mixins'
+
   export default {
     name: 'produce-edit',
-    props: {},
+    props: {
+      detail: {
+        type: Object,
+        default: () => {}
+      },
+      isWrite: {
+        type: Boolean,
+        default: false
+      }
+    },
     data() {
       return {
         formData: {
@@ -78,8 +94,13 @@
       }
     },
     components: {},
-    mixins: [],
+    mixins: [message],
     created() {
+      if (this.isWrite) {
+        for(let k in this.formData) {
+          this.formData[k] = this.detail[k]
+        }
+      }
     },
     methods: {
       imgListSuccess (data) {
@@ -128,5 +149,22 @@
   }
   .order-edit {
     overflow: auto;
+  }
+  .img-wrapper {
+    width: 100px;
+    height: 100px;
+    background-color: #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .upload-tip {
+      font-size: 60px;
+      color: #ddd;
+    }
   }
 </style>

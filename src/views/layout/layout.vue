@@ -106,6 +106,7 @@
      transition: left .3s;
        .single {
          margin: 10px;
+         padding-bottom: 20px;
        }
     }
   }

@@ -1,115 +1,212 @@
 <template>
   <div class="send-order">
-    <div class="query-wrapper">
-      <Select class="query-item" v-model="saleId" placeholder="请选择营业部" @on-change="changeSale">
-        <Option v-for="item in saleList" :value="item.infoId" :key="item.infoId">{{ item.infoValue }}</Option>
-      </Select>
-      <Select class="query-item" v-model="collectGoodsId" placeholder="请选择集采商品" @on-change="changeGoods">
-        <Option v-for="item in collectGoodsList" :value="item.infoId" :key="item.infoId">{{ item.infoValue }}</Option>
-      </Select>
+    <query-wrapper @userQuery="queryList">
+      <Input class="query-item" v-model="queryArgs.inviteCode" placeholder="邀请码"/>
+      <Input class="query-item" v-model="queryArgs.province" placeholder="省"/>
+      <Input class="query-item" v-model="queryArgs.city" placeholder="市"/>
+    </query-wrapper>
+    <div class="btn-wrapper">
+      <Button v-if="hasBtn('添加征订')" @click="openAddModal">添加征订</Button>
     </div>
-    <btn-wrapper @btnClick="btnClick"></btn-wrapper>
     <Table :columns="tableColumns" :loading="tableLoading" :data="tableData"></Table>
     <Page style="margin-top: 20px;text-align: center;" :current="pageNo" :total="total" show-elevator @on-change='changePage'></Page>
+    <Modal
+      v-model="addModal.isShow"
+      width="575"
+      :mask-closable="false"
+      title="新建征订">
+      <solicit-edit v-if="addModal.isShow" ref="addEdit" :codeList="codeList" :goodsList="goodsList"></solicit-edit>
+      <div slot="footer" style="text-align: center">
+        <Button type="primary" size="large" :loading="addModal.loading" @click="addConfirm">
+          确定
+        </Button>
+        <Button type="error" size="large" @click="closeAddModal">取消</Button>
+      </div>
+    </Modal>
+    <Modal
+      v-model="writeModal.isShow"
+      width="575"
+      :mask-closable="false"
+      title="修改征订">
+      <solicit-edit v-if="writeModal.isShow" ref="writeEdit" isWrite :detail="currentDetail" :codeList="codeList" :goodsList="goodsList"></solicit-edit>
+      <div slot="footer" style="text-align: center">
+        <Button type="primary" size="large" :loading="writeModal.loading" @click="writeConfirm">
+          确定
+        </Button>
+        <Button type="error" size="large" @click="closeWriteModal">取消</Button>
+      </div>
+    </Modal>
+    <Modal
+      v-model="deleteModal.isShow"
+      :mask-closable="false"
+      title="删除征订">
+      <p style="text-align: center;font-size: 14px;line-height: 60px">确认删除当前征订吗</p>
+      <div slot="footer" style="text-align: center">
+        <Button type="error" :loading="deleteModal.loading" @click="deleteConfirm">确认删除</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script>
-  import { message, table, page } from '@/common/js/mixins'
+  import queryWrapper from '@/components/query-wrapper'
+  import { message, table, page, addModal, writeModal } from '@/common/js/mixins'
   import btnWrapper from '@/components/btn-wrapper'
   import {sendOrderPage} from '@/api/request'
+  import solicitEdit from './components/solicit-edit'
 
   export default {
     name: "send-order",
     data () {
       return {
+        currentDetail: null,
         saleId: '',
         collectGoodsId: '',
-        saleList: [],
+        codeList: [],
+        goodsList: [],
         collectGoodsList: [],
+        queryArgs: {
+          inviteCode: '',
+          province: '',
+          city: ''
+        },
+        deleteModal: {
+          isShow: false,
+          loading: false
+        },
         tableColumns: [
           {
-            title: '订单编号',
-            key: 'purchaseOrderNumber'
+            title: '邀请码',
+            key: 'inviteCode'
           },
           {
-            title: '集采商品编号',
-            key: 'purchaseGoodsNumber'
-          },
-          {
-            title: '用户',
-            key: 'agentMemberName'
-          },
-          {
-            title: '营业部',
-            key: 'saleDepartmentName'
-          },
-          {
-            title: '订单金额',
-            render: (h, params) => {
-              return h('div', params.row.goodsCount * params.row.salePrice)
-            }
-          },
-          {
-            title: '商品名称',
+            title: '产品名称',
             key: 'goodsName'
           },
           {
-            title: '数量',
-            key: 'goodsCount'
+            title: '开始时间',
+            key: 'startTime'
           },
           {
-            title: '支付方式',
+            title: '省',
+            key: 'province'
+          },
+          {
+            title: '市',
+            key: 'city'
+          },
+          {
+            title: '结束时间',
+            key: 'endTime'
+          },
+          {
+            title: '状态',
             render: (h, params) => {
-              return h('div', params.row.payType === 1 ? '线上' : '线下')
+              return h('div', params.row.status === 1 ? '启用' : '停用')
             }
           },
           {
-            title: '起订量',
+            title: '操作',
             render: (h, params) => {
-              return h('div', params.row.haveMinCount === 1 ? '达标' : '未达标')
+              return h('div', [
+                h('Button', {
+                  props: {
+                    type: 'warning',
+                    size: 'small'
+                  },
+                  style: {
+                    margin: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      sendOrderPage.updateSolicitStatus({
+                        solicitGoodsId: params.row.solicitGoodsId,
+                        status: params.row.status === 1 ? 0 : 1
+                      }).then(data => {
+                        if (data !== 'isError') {
+                          this.successInfo('更改状态成功')
+                          this.getOrderList()
+                        }
+                      })
+                    }
+                  }
+                }, params.row.status === 1 ? '停用' : '启用'),
+                h('Button', {
+                  props: {
+                    type: 'warning',
+                    size: 'small'
+                  },
+                  style: {
+                    margin: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      this.currentDetail = params.row
+                      this.openWriteModal()
+                    }
+                  }
+                }, '编辑'),
+                h('Button', {
+                  props: {
+                    type: 'error',
+                    size: 'small'
+                  },
+                  style: {
+                    margin: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      this.currentDetail = params.row
+                      this.deleteModal.isShow = true
+                    }
+                  }
+                }, '删除')
+              ])
             }
-          },
-          {
-            title: '下单时间',
-            key: 'createTimeStr'
-          },
-          {
-            title: '集采结束时间',
-            key: 'purchaseEndTime'
           }
         ]
       }
     },
     components: {
-      btnWrapper
+      btnWrapper,
+      queryWrapper,
+      solicitEdit
     },
-    mixins: [message, table, page],
+    mixins: [message, table, page, addModal, writeModal],
     created () {
-      this.getSaleList()
+      this.getCodeList()
+      this.getGoodsList()
+      this.getOrderList()
     },
     methods: {
-      getSaleList () {
-        sendOrderPage.getNotSendSale().then(data => {
+      hasBtn (name) {
+        return this.handleList[this.$route.name] && (this.handleList[this.$route.name].indexOf(name) > -1)
+      },
+      getCodeList () {
+        sendOrderPage.getInviteCodeList({
+          pageSize: 1000000,
+          pageNo: 1
+        }).then(data => {
           if (data !== 'isError') {
-            this.saleList = data
+            this.codeList = data.list
           }
         })
       },
       getGoodsList () {
-        sendOrderPage.getNotSendOrder({
-          saleDepartmentId: this.saleId
+        sendOrderPage.getGoodsList({
+          pageSize: 1000000,
+          pageNo: 1
         }).then(data => {
           if (data !== 'isError') {
-            this.collectGoodsList = data
+            this.goodsList = data.list
           }
         })
       },
       getOrderList () {
-        sendOrderPage.getOrderList({
+        sendOrderPage.getSolicitGoodsList({
           pageNo: this.pageNo,
           pageSize: 10,
-          purchaseGoodsId: this.collectGoodsId
+          ...this.queryArgs
         }).then(data => {
           if (data !== 'isError') {
             this.tableData = data.list
@@ -117,28 +214,67 @@
           }
         })
       },
-      changeSale () {
-        this.getGoodsList()
-      },
-      changeGoods () {
-        this.getOrderList()
-      },
-      btnClick (handleName) {
-        switch (handleName) {
-          case '一键发货':
-              sendOrderPage.oneTapSend({
-                purchaseGoodsId: this.collectGoodsId
-              }).then(data => {
-                if (data !== 'isError') {
-                  this.successInfo('发货成功')
-                  this.getOrderList()
-                }
-              })
-            break
+      addConfirm () {
+        let returnData = this.$refs.addEdit.returnData()
+        if (returnData) {
+          this.openAddLoading()
+          sendOrderPage.addSolicitGoods({
+            ...returnData
+          }).then(data => {
+            this.closeAddLoading()
+            if (data !== 'isError') {
+              this.successInfo('新建产品成功')
+              this.getOrderList()
+              this.closeAddModal()
+            }
+          }).catch(err => {
+            this.closeAddLoading()
+          })
         }
+      },
+      writeConfirm () {
+        let returnData = this.$refs.writeEdit.returnData()
+        if (returnData) {
+          delete returnData.inviteCodeId
+          delete returnData.goodsId
+          this.openWriteLoading()
+          sendOrderPage.updateSolicitGoods({
+            solicitGoodsId: this.currentDetail.solicitGoodsId,
+            ...returnData
+          }).then(data => {
+            this.closeWriteLoading()
+            if (data !== 'isError') {
+              this.successInfo('修改产品成功')
+              this.getOrderList()
+              this.closeWriteModal()
+            }
+          }).catch(err => {
+            this.closeWriteLoading()
+          })
+        }
+      },
+      deleteConfirm () {
+        this.deleteModal.loading = true
+        sendOrderPage.deleteSolicitGoods({
+          solicitGoodsId: this.currentDetail.solicitGoodsId
+        }).then(data => {
+          if (data !== 'isError') {
+            this.successInfo('删除产品成功')
+            this.correctPageNo()
+            this.getOrderList()
+            this.deleteModal.isShow = false
+          }
+          this.deleteModal.loading = false
+        }).catch(err => {
+          this.deleteModal.loading = false
+        })
       },
       changePage (no) {
         this.pageNo = no
+        this.getOrderList()
+      },
+      queryList () {
+        this.pageNo = 1
         this.getOrderList()
       }
     }

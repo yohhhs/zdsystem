@@ -376,13 +376,7 @@ export const insideUser = {
   updateManagerMember,
   updateManagerStatus
 }
-export const sendOrderPage = {
-  addGoods,
-  deleteGoods,
-  getGoodsList,
-  updateGoods,
-  updateGoodsStatus
-}
+
 
 export const dealCount = {
   getDataCount,
@@ -457,14 +451,29 @@ export const addInviteCode = params => {
 export const deleteInviteCode = params => {
   return instance.post('/invite/code/deleteInviteCode', params)
 }
+export const updateInviteCode = params => {
+  return instance.post('/invite/code/updateInviteCode', params)
+}
+export const addSolicitGoods = params => {
+  return instance.post('/solicit/goods/addSolicitGoods', params)
+}
+export const deleteSolicitGoods = params => {
+  return instance.post('/solicit/goods/deleteSolicitGoods', params)
+}
+export const getSolicitGoodsList = params => {
+  return instance.post('/solicit/goods/getSolicitGoodsList', params)
+}
 export const updateSolicitGoods = params => {
   return instance.post('/solicit/goods/updateSolicitGoods', params)
+}
+export const updateSolicitStatus = params => {
+  return instance.post('/solicit/goods/updateStatus', params)
 }
 export const allOrder = {
   getInviteCodeList,
   addInviteCode,
   deleteInviteCode,
-  updateSolicitGoods
+  updateInviteCode
 }
 export const waitOrder = {
   addGoods,
@@ -472,4 +481,14 @@ export const waitOrder = {
   getGoodsList,
   updateGoods,
   updateGoodsStatus
+}
+
+export const sendOrderPage = {
+  addSolicitGoods,
+  deleteSolicitGoods,
+  getSolicitGoodsList,
+  updateSolicitGoods,
+  updateSolicitStatus,
+  getInviteCodeList,
+  getGoodsList
 }

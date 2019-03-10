@@ -358,7 +358,7 @@
         if (returnData) {
           delete returnData.inviteCode
           this.openWriteLoading()
-          allOrder.updateSolicitGoods({
+          allOrder.updateInviteCode({
             inviteCodeId: this.currentDetail.inviteCodeId,
             ...returnData
           }).then(data => {
