@@ -134,8 +134,8 @@ export const appRouter = [
     ]
   },
   {
-    path: '/order-manager',
-    name: 'order-manager',
+    path: '/order-cancel',
+    name: 'order-cancel',
     component: Main,
     single: 'cancel-order',
     children: [
@@ -143,6 +143,32 @@ export const appRouter = [
         path: 'cancel-order',
         name: 'cancel-order',
         component: resolve => require(['@/views/order-manager/cancel-order.vue'], resolve)
+      }
+    ]
+  },
+  {
+    path: '/order-send',
+    name: 'order-send',
+    component: Main,
+    single: 'send-order',
+    children: [
+      {
+        path: 'send-order',
+        name: 'send-order',
+        component: resolve => require(['@/views/order-manager/send-order.vue'], resolve)
+      }
+    ]
+  },
+  {
+    path: '/order-wait',
+    name: 'order-wait',
+    component: Main,
+    single: 'wait-order',
+    children: [
+      {
+        path: 'wait-order',
+        name: 'wait-order',
+        component: resolve => require(['@/views/order-manager/wait-order.vue'], resolve)
       }
     ]
   },

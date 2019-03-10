@@ -79,6 +79,10 @@ export const deleteUser = params => {
 export const addGoods = params => {
   return instance.post('/goods/addGoods', params)
 }
+// 添加商品
+export const deleteGoods = params => {
+  return instance.post('/goods/deleteGoods', params)
+}
 // 获取品牌列表
 export const getBrandList = params => {
   return instance.post('/goods/getGoodsBrandList', params)
@@ -94,6 +98,10 @@ export const getGoodsList = params => {
 // 更新商品
 export const updateGoods = params => {
   return instance.post('/goods/updateGoods', params)
+}
+// 更新商品
+export const updateGoodsStatus = params => {
+  return instance.post('/goods/updateStatus', params)
 }
 // 新增结构用户
 export const addOrganizeUser = params => {
@@ -369,10 +377,11 @@ export const insideUser = {
   updateManagerStatus
 }
 export const sendOrderPage = {
-  getNotSendSale,
-  getNotSendOrder,
-  oneTapSend,
-  getOrderList
+  addGoods,
+  deleteGoods,
+  getGoodsList,
+  updateGoods,
+  updateGoodsStatus
 }
 
 export const dealCount = {
@@ -393,8 +402,8 @@ export const baseGoods = {
   getGoodsSpecialList,
   getGoodsDetail,
   getGoodsList,
-  updateGoods,
-  updateGoodsStatus
+  updateGoods
+
 }
 export const organizeUser = {
   addOrganizeUser,
@@ -439,26 +448,28 @@ export const organizeManager = {
   updateSaleDepartment,
   getOrganizeUserList
 }
-export const addSolicitGoods = params => {
-  return instance.post('/solicit/goods/addSolicitGoods', params)
+export const getInviteCodeList = params => {
+  return instance.post('/invite/code/getInviteCodeList', params)
 }
-export const getSolicitGoodsList = params => {
-  return instance.post('/solicit/goods/getSolicitGoodsList', params)
+export const addInviteCode = params => {
+  return instance.post('/invite/code/addInviteCode', params)
 }
-export const updateGoodsStatus = params => {
-  return instance.post('/solicit/goods/updateGoodsStatus', params)
+export const deleteInviteCode = params => {
+  return instance.post('/invite/code/deleteInviteCode', params)
 }
 export const updateSolicitGoods = params => {
   return instance.post('/solicit/goods/updateSolicitGoods', params)
 }
-export const deleteSolicitGoods = params => {
-  return instance.post('/solicit/goods/deleteSolicitGoods', params)
-}
 export const allOrder = {
-  addSolicitGoods,
-  getSolicitGoodsList,
-  updateGoodsStatus,
-  updateSolicitGoods,
-  deleteSolicitGoods,
-  getOrderList
+  getInviteCodeList,
+  addInviteCode,
+  deleteInviteCode,
+  updateSolicitGoods
+}
+export const waitOrder = {
+  addGoods,
+  deleteGoods,
+  getGoodsList,
+  updateGoods,
+  updateGoodsStatus
 }

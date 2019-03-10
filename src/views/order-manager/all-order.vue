@@ -1,18 +1,9 @@
 <template>
   <div class="all-order">
     <query-wrapper @userQuery="queryList">
-      <Input class="query-item" v-model="queryArgs.keyword" placeholder="邀请码" clearable/>
-      <DatePicker
-        class="query-item"
-        type="datetime" placeholder="征订开始时间"
-        clearable :editable="false" @on-change="orderStartChange"></DatePicker>
-      <DatePicker
-        class="query-item"
-        type="datetime" placeholder="征订结束时间"
-        clearable :editable="false" @on-change="orderEndChange"></DatePicker>
-      <Select class="query-item" v-model="queryArgs.solicitState" placeholder="请选择状态" clearable>
-        <Option v-for="item in orderStatusList" :value="item.id" :key="item.id">{{ item.name }}</Option>
-      </Select>
+      <Input class="query-item" v-model="queryArgs.inviteCode" placeholder="邀请码" clearable/>
+      <Input class="query-item" v-model="queryArgs.province" placeholder="省" clearable/>
+      <Input class="query-item" v-model="queryArgs.city " placeholder="市" clearable/>
     </query-wrapper>
     <div class="btn-wrapper">
       <Button v-if="hasBtn('新建邀请码')" @click="openAddModal">新建邀请码</Button>
@@ -37,7 +28,7 @@
         <Button type="primary" :loading="writeModal.loading" @click="writeConfirm">修改邀请码</Button>
       </div>
     </Modal>
-    <Modal
+    <!--<Modal
       v-model="changeStatusModal.isShow"
       :mask-closable="false"
       title="修改状态">
@@ -45,17 +36,17 @@
       <div slot="footer" style="text-align: center">
         <Button type="primary" :loading="changeStatusModal.loading" @click="changeStatusConfirm">确认修改</Button>
       </div>
-    </Modal>
+    </Modal>-->
     <Modal
       v-model="deleteModal.isShow"
       :mask-closable="false"
-      title="关闭邀请码征订">
-      <p style="text-align: center;font-size: 14px;">确认关闭当前邀请码征订</p>
+      title="删除邀请码">
+      <p style="text-align: center;font-size: 14px;">确认删除当前邀请码吗</p>
       <div slot="footer" style="text-align: center">
         <Button type="error" :loading="deleteModal.loading" @click="deleteConfirm">确认关闭</Button>
       </div>
     </Modal>
-    <Modal
+    <!--<Modal
       v-model="lookModal"
       :mask-closable="false"
       width="700"
@@ -67,10 +58,10 @@
         </div>
       <Table :columns="listDetail.col" :loading="listDetail.loading" :data="listDetail.data"></Table>
       <div slot="footer">
-        <!--<Page style="margin-top: 20px;text-align: center;" :current="pageNo" :total="total" show-elevator @on-change='changeDetailPage'></Page>-->
+        &lt;!&ndash;<Page style="margin-top: 20px;text-align: center;" :current="pageNo" :total="total" show-elevator @on-change='changeDetailPage'></Page>&ndash;&gt;
       </div>
-    </Modal>
-    <Modal
+    </Modal>-->
+    <!--<Modal
       v-model="uploadModal"
       :mask-closable="false"
       width="300"
@@ -82,7 +73,7 @@
       </div>
       <div slot="footer">
       </div>
-    </Modal>
+    </Modal>-->
   </div>
 </template>
 <script>
@@ -132,10 +123,9 @@
           loading: false
         },
         queryArgs: {
-          keyword: '',
-          startTime: '',
-          endTime: '',
-          solicitState: ''
+          province: '',
+          inviteCode: '',
+          city: ''
         },
         orderStatusList: [
           {
@@ -152,94 +142,31 @@
           }
         ],
         tableColumns: [
-          // {
-          //   type: 'selection',
-          //   width: 60,
-          //   align: 'center'
-          // },
           {
             title: '邀请码',
             key: 'inviteCode',
             width: 90
           },
           {
-            title: '产品名称',
-            key: 'goodsName'
+            title: '管理员',
+            key: 'manageName'
           },
           {
-            title: '供应商',
-            key: 'supplier'
+            title: '省',
+            key: 'province'
           },
           {
-            title: '产品单位',
-            key: 'standard'
+            title: '市',
+            key: 'city'
           },
           {
-            title: '产品状态',
-            render: (h, params) => {
-              return h('div', {
-                style: {
-                  color: params.row.goodsStatus === 0 ? '#ed4014' : '#19be6b'
-                }
-              }, params.row.goodsStatus === 0 ? '停用' : '启用')
-            }
-          },
-          {
-            title: '征订状态',
-            render: (h, params) => {
-              let status = ''
-              switch (params.row.solicitState) {
-                case 1:
-                  status = '未开始'
-                  break
-                case 2:
-                  status = '进行中'
-                  break
-                case 3:
-                  status = '已完成'
-                  break
-              }
-              return h('div', status)
-            }
-          },
-          {
-            title: '开始时间',
-            key: 'startTime',
-            width: 100
-          },
-          {
-            title: '结束时间',
-            key: 'endTime',
-            width: 100
-          },
-          {
-            title: '创建时间',
-            key: 'createTimeStr',
-            width: 100
-          },
-          {
-            title: '更新时间',
-            key: 'updateTimeStr',
-            width: 100
+            title: '注释',
+            key: 'other'
           },
           {
             title: '操作',
             width: 150,
             render: (h, params) => {
-              let handles = []
-              let goodsStatus = params.row.goodsStatus
-              let statusChange = h('span', {
-                style: {
-                  color: goodsStatus === 1 ? '#ed4014' : '#19be6b',
-                  cursor: 'pointer'
-                },
-                on: {
-                  click: () => {
-                    this.currentDetail = params.row
-                    this.openChangeStatusModal()
-                  }
-                }
-              }, goodsStatus === 1 ? '停用' : '启用')
               let edit = h('span', {
                 style: {
                   color: '#f90',
@@ -252,9 +179,9 @@
                   }
                 }
               }, '修改')
-              let close = h('span', {
+              let del = h('span', {
                 style: {
-                  color: '#ed4014',
+                  color: '#f90',
                   cursor: 'pointer'
                 },
                 on: {
@@ -263,37 +190,10 @@
                     this.openDeleteModal()
                   }
                 }
-              }, '关闭')
-              let look = h('span', {
-                style: {
-                  color: '#2d8cf0',
-                  cursor: 'pointer'
-                },
-                on: {
-                  click: () => {
-                    this.currentDetail = params.row
-                    this.lookModal = true
-                    this.getListDetail()
-                  }
-                }
-              }, '查看')
-              switch (params.row.solicitState) {
-                case 1:
-                  handles = [statusChange, edit, close]
-                  break
-                case 2:
-                  handles = [statusChange, edit, look]
-                  break
-                case 3:
-                  handles = [look]
-                  break
-              }
+              }, '删除')
               return h('div', {
-                style: {
-                  display: 'flex',
-                  justifyContent: 'space-between'
-                }
-              }, handles)
+                class: 'handle-wrapper'
+              }, [edit, del])
             }
           }
         ]
@@ -311,7 +211,7 @@
     methods: {
       getAllOrder () {
         this.openTableLoading()
-        allOrder.getSolicitGoodsList({
+        allOrder.getInviteCodeList({
           pageNo: this.pageNo,
           pageSize: 10,
           ...this.queryArgs
@@ -331,7 +231,7 @@
         this.selectIds = ids
       },
       hasBtn (name) {
-        return this.handleList[this.$route.name] && (this.handleList[this.$route.name].indexOf('新建邀请码') > -1)
+        return this.handleList[this.$route.name] && (this.handleList[this.$route.name].indexOf(name) > -1)
       },
       changeDetailPage (page) {
         this.listDetail.page = page
@@ -419,30 +319,14 @@
       openDeleteModal () {
         this.deleteModal.isShow = true
       },
-      changeStatusConfirm () {
-        this.changeStatusModal.loading = true
-        allOrder.updateGoodsStatus({
-          goodsId: this.currentDetail.goodsId,
-          goodsStatus: this.currentDetail.goodsStatus === 1 ? 0 : 1
-        }).then(data => {
-          this.changeStatusModal.loading = false
-          if (data !== 'isError') {
-            this.successInfo('修改状态成功')
-            this.changeStatusModal.isShow = false
-            this.getAllOrder()
-          }
-        }).catch(err => {
-          this.changeStatusModal.loading = false
-        })
-      },
       deleteConfirm () {
         this.deleteModal.loading = true
-        allOrder.deleteSolicitGoods({
-          goodsId: this.currentDetail.goodsId
+        allOrder.deleteInviteCode({
+          inviteCodeId: this.currentDetail.inviteCodeId
         }).then(data => {
           this.deleteModal.loading = false
           if (data !== 'isError') {
-            this.successInfo('关闭成功')
+            this.successInfo('删除成功')
             this.deleteModal.isShow = false
             this.correctPageNo()
             this.getAllOrder()
@@ -455,7 +339,7 @@
         let returnData = this.$refs.addEdit.returnData()
         if (returnData) {
           this.openAddLoading()
-          allOrder.addSolicitGoods({
+          allOrder.addInviteCode({
             ...returnData
           }).then(data => {
             this.closeAddLoading()
@@ -472,9 +356,10 @@
       writeConfirm () {
         let returnData = this.$refs.writeEdit.returnData()
         if (returnData) {
+          delete returnData.inviteCode
           this.openWriteLoading()
           allOrder.updateSolicitGoods({
-            goodsId: this.currentDetail.goodsId,
+            inviteCodeId: this.currentDetail.inviteCodeId,
             ...returnData
           }).then(data => {
             this.closeWriteLoading()
