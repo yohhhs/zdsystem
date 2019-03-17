@@ -1,85 +1,26 @@
 <template>
   <div class="cancel-order">
     <query-wrapper @userQuery="queryList">
-      <Input class="query-item" v-model="queryArgs.keyword" placeholder="邀请码" clearable/>
+      <Input class="query-item" v-model="queryArgs.inviteCode" placeholder="邀请码" clearable/>
+      <Input class="query-item" v-model="queryArgs.goodsName" placeholder="商品名称" clearable/>
+      <Input class="query-item" v-model="queryArgs.goodsCode" placeholder="商品编码" clearable/>
       <DatePicker
         class="query-item"
-        type="datetime" placeholder="征订开始时间"
+        type="datetime" placeholder="开始时间"
         clearable :editable="false" @on-change="orderStartChange"></DatePicker>
       <DatePicker
         class="query-item"
-        type="datetime" placeholder="征订结束时间"
+        type="datetime" placeholder="结束时间"
         clearable :editable="false" @on-change="orderEndChange"></DatePicker>
-      <Select class="query-item" v-model="queryArgs.solicitState" placeholder="请选择状态" clearable>
+      <!--<Select class="query-item" v-model="queryArgs.solicitState" placeholder="请选择状态" clearable>
         <Option v-for="item in orderStatusList" :value="item.id" :key="item.id">{{ item.name }}</Option>
-      </Select>
+      </Select>-->
     </query-wrapper>
+    <div class="btn-wrapper">
+      <Button v-if="hasBtn('导出')" @click="exportExcel">导出</Button>
+    </div>
     <Table :columns="tableColumns" :loading="tableLoading" :data="tableData" @on-selection-change="tableSelectChange"></Table>
     <Page style="margin-top: 20px;text-align: center;" :current="pageNo" :total="total" show-elevator @on-change='changePage'></Page>
-    <Modal
-      v-model="addModal.isShow"
-      :mask-closable="false"
-      title="新建邀请码">
-      <order-edit ref="addEdit" v-if="addModal.isShow"></order-edit>
-      <div slot="footer" style="text-align: center">
-        <Button type="primary" :loading="addModal.loading" @click="addConfirm">新建邀请码</Button>
-      </div>
-    </Modal>
-    <Modal
-      v-model="writeModal.isShow"
-      :mask-closable="false"
-      title="修改邀请码">
-      <order-edit ref="writeEdit" v-if="writeModal.isShow" isWrite :detail="currentDetail"></order-edit>
-      <div slot="footer" style="text-align: center">
-        <Button type="primary" :loading="writeModal.loading" @click="writeConfirm">修改邀请码</Button>
-      </div>
-    </Modal>
-    <Modal
-      v-model="changeStatusModal.isShow"
-      :mask-closable="false"
-      title="修改状态">
-      <p v-if="changeStatusModal.isShow" style="text-align: center;font-size: 14px;">确认{{currentDetail.goodsStatus === 0 ? '启用' : '停用'}}当前邀请码征订</p>
-      <div slot="footer" style="text-align: center">
-        <Button type="primary" :loading="changeStatusModal.loading" @click="changeStatusConfirm">确认修改</Button>
-      </div>
-    </Modal>
-    <Modal
-      v-model="deleteModal.isShow"
-      :mask-closable="false"
-      title="关闭邀请码征订">
-      <p style="text-align: center;font-size: 14px;">确认关闭当前邀请码征订</p>
-      <div slot="footer" style="text-align: center">
-        <Button type="error" :loading="deleteModal.loading" @click="deleteConfirm">确认关闭</Button>
-      </div>
-    </Modal>
-    <Modal
-      v-model="lookModal"
-      :mask-closable="false"
-      width="700"
-      title="查看订单详情">
-      <div v-if="lookModal" style="display:flex;justify-content:space-between;font-size: 14px;margin-bottom: 15px;padding: 0 5px;">
-        <span>邀请码：{{currentDetail.inviteCode}}</span>
-        <span>规格：{{currentDetail.standard}}</span>
-        <span>征订总数：{{listDetail.count}}</span>
-      </div>
-      <Table :columns="listDetail.col" :loading="listDetail.loading" :data="listDetail.data"></Table>
-      <div slot="footer">
-        <!--<Page style="margin-top: 20px;text-align: center;" :current="pageNo" :total="total" show-elevator @on-change='changeDetailPage'></Page>-->
-      </div>
-    </Modal>
-    <Modal
-      v-model="uploadModal"
-      :mask-closable="false"
-      width="300"
-      title="导入订单">
-      <div style="text-align: center">
-        <Upload :on-success="uploadSuccess" :format="['xls']" action="https://www.topasst.com/cms/purchaseOrder/addPurchaseOrder" :on-format-error="formatHandle">
-          <Button style="width: 200px" type="primary" ghost icon="ios-cloud-upload-outline">导入订单</Button>
-        </Upload>
-      </div>
-      <div slot="footer">
-      </div>
-    </Modal>
   </div>
 </template>
 <script>
@@ -87,7 +28,8 @@
   import btnWrapper from '@/components/btn-wrapper'
   import orderEdit from './components/order-edit'
   import { message, table, page, addModal, writeModal } from '@/common/js/mixins'
-  import { allOrder } from '@/api/request'
+  import { getOrderList } from '@/api/request'
+  import {baseUrl} from "../../common/js/config";
 
   export default {
     data () {
@@ -129,10 +71,11 @@
           loading: false
         },
         queryArgs: {
-          keyword: '',
+          inviteCode: '',
+          goodsName: '',
+          goodsCode: '',
           startTime: '',
-          endTime: '',
-          solicitState: ''
+          endTime: ''
         },
         orderStatusList: [
           {
@@ -149,15 +92,13 @@
           }
         ],
         tableColumns: [
-          // {
-          //   type: 'selection',
-          //   width: 60,
-          //   align: 'center'
-          // },
           {
             title: '邀请码',
-            key: 'inviteCode',
-            width: 90
+            key: 'inviteCode'
+          },
+          {
+            title: '产品编码',
+            key: 'goodsCode'
           },
           {
             title: '产品名称',
@@ -168,100 +109,23 @@
             key: 'supplier'
           },
           {
-            title: '产品单位',
-            key: 'standard'
+            title: '征订开始时间',
+            key: 'startTime'
           },
           {
-            title: '产品状态',
+            title: '征订结束时间',
+            key: 'endTime'
+          },
+          {
+            title: '状态',
             render: (h, params) => {
-              return h('div', {
-                style: {
-                  color: params.row.goodsStatus === 0 ? '#ed4014' : '#19be6b'
-                }
-              }, params.row.goodsStatus === 0 ? '停用' : '启用')
+              let status = ['未开始', '进行中', '已完成']
+              return h('div', status[params.row.solicitState])
             }
           },
           {
-            title: '征订状态',
-            render: (h, params) => {
-              let status = ''
-              switch (params.row.solicitState) {
-                case 1:
-                  status = '未开始'
-                  break
-                case 2:
-                  status = '进行中'
-                  break
-                case 3:
-                  status = '已完成'
-                  break
-              }
-              return h('div', status)
-            }
-          },
-          {
-            title: '开始时间',
-            key: 'startTime',
-            width: 100
-          },
-          {
-            title: '结束时间',
-            key: 'endTime',
-            width: 100
-          },
-          {
-            title: '创建时间',
-            key: 'createTimeStr',
-            width: 100
-          },
-          {
-            title: '更新时间',
-            key: 'updateTimeStr',
-            width: 100
-          },
-          {
-            title: '操作',
-            width: 120,
-            render: (h, params) => {
-              return h('div', {
-                style: {
-                  display: 'flex',
-                  justifyContent: 'space-between'
-                }
-              }, [
-                h('span', {
-                  style: {
-                    color: '#2d8cf0',
-                    cursor: 'pointer'
-                  },
-                  on: {
-                    click: () => {
-                      if (params.row.solicitState === 1) {
-                        return this.warningInfo('征订未开始，无法查看')
-                      }
-                      this.currentDetail = params.row
-                      this.lookModal = true
-                      this.getListDetail()
-                    }
-                  }
-                }, '查看'),
-                h('span', {
-                  style: {
-                    color: '#2d8cf0',
-                    cursor: 'pointer'
-                  },
-                  on: {
-                    click: () => {
-                      if (params.row.solicitState === 1) {
-                        return this.warningInfo('征订未开始，无法导出')
-                      }
-                      this.currentDetail = params.row
-                      window.location.href = `https://www.topasst.com/solicitCms/purchaseOrder/getPurchaseOrderExcelList?solicitGoodsId=${params.row.goodsId}`
-                    }
-                  }
-                }, '导出')
-              ])
-            }
+            title: '数量',
+            key: 'goodsCount'
           }
         ]
       }
@@ -276,9 +140,12 @@
       this.getAllOrder()
     },
     methods: {
+      hasBtn (name) {
+        return this.handleList[this.$route.name] && (this.handleList[this.$route.name].indexOf(name) > -1)
+      },
       getAllOrder () {
         this.openTableLoading()
-        allOrder.getSolicitGoodsList({
+        getOrderList({
           pageNo: this.pageNo,
           pageSize: 10,
           ...this.queryArgs
@@ -296,9 +163,6 @@
           ids.push(item.purchaseOrderId)
         })
         this.selectIds = ids
-      },
-      hasBtn (name) {
-        return this.handleList[this.$route.name] && (this.handleList[this.$route.name].indexOf('新建邀请码') > -1)
       },
       changeDetailPage (page) {
         this.listDetail.page = page
@@ -386,74 +250,16 @@
       openDeleteModal () {
         this.deleteModal.isShow = true
       },
-      changeStatusConfirm () {
-        this.changeStatusModal.loading = true
-        allOrder.updateGoodsStatus({
-          goodsId: this.currentDetail.goodsId,
-          goodsStatus: this.currentDetail.goodsStatus === 1 ? 0 : 1
-        }).then(data => {
-          this.changeStatusModal.loading = false
-          if (data !== 'isError') {
-            this.successInfo('修改状态成功')
-            this.changeStatusModal.isShow = false
-            this.getAllOrder()
+      exportExcel () {
+        let params = []
+        for (let k in this.queryArgs) {
+          if (this.queryArgs[k] === 0) {
+            params.push(k + '=' + this.queryArgs[k])
+          } else {
+            params.push(k + '=' + (this.queryArgs[k] ? this.queryArgs[k] : ''))
           }
-        }).catch(err => {
-          this.changeStatusModal.loading = false
-        })
-      },
-      deleteConfirm () {
-        this.deleteModal.loading = true
-        allOrder.deleteSolicitGoods({
-          goodsId: this.currentDetail.goodsId
-        }).then(data => {
-          this.deleteModal.loading = false
-          if (data !== 'isError') {
-            this.successInfo('关闭成功')
-            this.deleteModal.isShow = false
-            this.correctPageNo()
-            this.getAllOrder()
-          }
-        }).catch(err => {
-          this.deleteModal.loading = false
-        })
-      },
-      addConfirm () {
-        let returnData = this.$refs.addEdit.returnData()
-        if (returnData) {
-          this.openAddLoading()
-          allOrder.addSolicitGoods({
-            ...returnData
-          }).then(data => {
-            this.closeAddLoading()
-            if (data !== 'isError') {
-              this.successInfo('新建邀请码成功')
-              this.getAllOrder()
-              this.closeAddModal()
-            }
-          }).catch(err => {
-            this.closeAddLoading()
-          })
         }
-      },
-      writeConfirm () {
-        let returnData = this.$refs.writeEdit.returnData()
-        if (returnData) {
-          this.openWriteLoading()
-          allOrder.updateSolicitGoods({
-            goodsId: this.currentDetail.goodsId,
-            ...returnData
-          }).then(data => {
-            this.closeWriteLoading()
-            if (data !== 'isError') {
-              this.successInfo('修改邀请码成功')
-              this.getAllOrder()
-              this.closeWriteModal()
-            }
-          }).catch(err => {
-            this.closeWriteLoading()
-          })
-        }
+        window.location.href = baseUrl + '/purchaseOrder/getPurchaseOrderExcelList?' + params.join('&')
       }
     }
   }
