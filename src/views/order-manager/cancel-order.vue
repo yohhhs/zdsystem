@@ -94,6 +94,7 @@
         tableColumns: [
           {
             title: '邀请码',
+            width: 100,
             key: 'inviteCode'
           },
           {
@@ -120,7 +121,7 @@
             title: '状态',
             render: (h, params) => {
               let status = ['未开始', '进行中', '已完成']
-              return h('div', status[params.row.solicitState])
+              return h('div', params.row.orderState === 9 ? '已取消' : status[params.row.solicitState])
             }
           },
           {
