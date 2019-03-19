@@ -44,7 +44,7 @@
           accept="image/*"
           :format="['jpg','jpeg','png']"
           :on-success="imgListSuccess"
-          action="https://www.topasst.com/cms/file/uploadFile">
+          action="https://www.topasst.com/solicitCms/file/uploadFile">
           <!--<Button type="primary" ghost>上传产品图片</Button>-->
           <div class="img-wrapper">
             <span v-if="formData.goodsImage === ''" class="upload-tip">+</span>
@@ -104,7 +104,7 @@
     },
     methods: {
       imgListSuccess (data) {
-        this.formData.goodsImage = data.data
+        this.formData.goodsImage = 'https://www.topasst.com/images/' + data.data
       },
       returnData () {
         if (this.formData.goodsCode === '') {
