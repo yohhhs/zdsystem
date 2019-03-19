@@ -145,7 +145,7 @@
           {
             title: '邀请码',
             key: 'inviteCode',
-            width: 90
+            width: 120
           },
           {
             title: '管理员',

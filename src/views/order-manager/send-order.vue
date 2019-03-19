@@ -77,6 +77,7 @@
         tableColumns: [
           {
             title: '邀请码',
+            width: 120,
             key: 'inviteCode'
           },
           {
