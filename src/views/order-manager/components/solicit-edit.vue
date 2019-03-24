@@ -3,7 +3,7 @@
     <div class="modal-input-item">
       <p class="label">邀请码：</p>
       <div style="width: 350px">
-        <Select v-model="formData.inviteCodeId" :disabled="isWrite" placeholder="请选择邀请码">
+        <Select v-model="formData.inviteCodeId" :disabled="isWrite" placeholder="请选择邀请码" filterable>
           <Option v-for="item in codeList" :value="item.inviteCodeId" :key="item.inviteCodeId">{{ item.inviteCode }}</Option>
         </Select>
       </div>
